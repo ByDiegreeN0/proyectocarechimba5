@@ -6,89 +6,88 @@ const fechaEvento = document.querySelector('#fechaEvento');
 const botonAgregar = document.querySelector('#agregar');
 const listaEventos = document.querySelector('#lstaEventos');
 
+// Cargar eventos desde localStorage
+function cargar() {
+    return localStorage.getItem("lista");
+}
+
+const json = cargar();
+try {
+    arr = JSON.parse(json) || []; // Si JSON.parse retorna null, se usa un array vacío
+} catch (error) {
+    console.error("Error al parsear JSON:", error);
+    arr = [];
+}
+
+eventos = [...arr]; // Asigna eventos desde arr
+
 // Función para mostrar los eventos en el contenedor
 function mostrarEventos() {
-    // Actualiza el contenido HTML del contenedor con una lista de eventos
-    const eventosHTML = eventos.map((eventos) => {
-        return `  
-                <div class="evento">
-                    <div class="dias">
-                        <span class="diasFaltantes"></span>
-                        <span class="texto">dias para</span>
-                    </div>
+    const eventosHTML = eventos.map(evento => `
+        <div class="evento">
+            <div class="dias">
+                <span class="diasFaltantes">${diferenciaFecha(evento.fecha)} días</span>
+                <span class="texto">días para</span>
+            </div>
+            <div class="nombreEvento">${evento.nombre}</div>
+            <div class="fechaEvento">${evento.fecha}</div>
+            <div class="acciones">
+                <button data-id="${evento.id}" class="eliminar">Eliminar</button>
+            </div>
+        </div>
+    `).join('');
 
-                    <div class="nombreEvento">${eventos.nombre}</div>
-                    <div class="fechaEvento">${eventos.fecha}</div>
+    listaEventos.innerHTML = eventosHTML;
 
-                    <div class="acciones">
-                        <button data-id="${eventos.id}" class="eliminar">Eliminar</button>
-                    </div>
-
-                </div>`;
-    });
-
-    listaEventos.innerHTML = eventosHTML.join("");
-
+    // Añadir manejadores de eventos para los botones de eliminar
     document.querySelectorAll('.eliminar').forEach(button => {
-
         button.addEventListener("click", e => {
             const id = button.getAttribute('data-id');
             eventos = eventos.filter(evento => evento.id !== id);
 
-            mostrarEventos();
-
-        })
+            guardar(JSON.stringify(eventos));
+            mostrarEventos(); // Volver a mostrar eventos actualizados
+        });
     });
 }
 
-// Función para calcular la diferencia en milisegundos entre la fecha actual y la fecha del evento
-function diferenciaFecha(fecha) {
-    // Obtiene la fecha y hora actuales
-    let hoy = new Date();
-    // Convierte la fecha del evento en un objeto Date
-    let evento = new Date(fecha);
-    // Calcula la diferencia en milisegundos entre la fecha del evento y la fecha actual
-    let diferencia = evento.getTime() - hoy.getTime();
-    
-    // Calcula la diferencia en días y horas
-    let dias = Math.ceil(diferencia / (1000 * 3600 * 24));
-    
-    // Devuelve la diferencia en milisegundos
-    return dias;
+function guardar(datos) {
+    localStorage.setItem("lista", datos);
 }
 
-// Función para agregar un nuevo evento
-function agregarEvento() {
-    // Verifica que los campos no estén vacíos y que la fecha del evento sea futura
-    if (nombreEvento.value === "" || fechaEvento.value === "") {
-        return; // Si alguna condición no se cumple, termina la función
-    }
+function diferenciaFecha(fecha) {
+    const hoy = new Date();
+    const evento = new Date(fecha);
+    const diferencia = evento.getTime() - hoy.getTime();
+    return Math.ceil(diferencia / (1000 * 3600 * 24));
+}
 
-    if( diferenciaFecha(fechaEvento.value) < 0){
+function agregarEvento() {
+    if (nombreEvento.value === "" || fechaEvento.value === "") {
         return;
     }
 
-    // Crea un nuevo objeto para el evento
+    if (diferenciaFecha(fechaEvento.value) < 0) {
+        return;
+    }
+
     const nuevoEvento = {
-        // Genera un ID único para el evento
         id: (Math.random() * 100).toString(36).slice(3),
-        // Usa el valor del campo de nombre del evento
-        nobre: nombreEvento.value,
-        // Usa el valor del campo de fecha del evento
+        nombre: nombreEvento.value,
         fecha: fechaEvento.value
     };
 
-    // Añade el nuevo evento al inicio del array de eventos
     eventos.unshift(nuevoEvento);
-    // Limpia el campo de nombre del evento
+    guardar(JSON.stringify(eventos));
     nombreEvento.value = "";
-
-    // Llama a la función para mostrar los eventos actualizados
     mostrarEventos();
 }
 
-// Añade un manejador de eventos para el formulario
+// Añadir manejador de eventos para el formulario
 document.querySelector("form").addEventListener("submit", e => {
-    e.preventDefault(); // Previene el comportamiento predeterminado del formulario (recarga de página)
-    agregarEvento(); // Llama a la función para agregar el evento
+    e.preventDefault();
+    agregarEvento();
 });
+
+// Mostrar eventos al cargar la página
+mostrarEventos();
