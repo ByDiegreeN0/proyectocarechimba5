@@ -50,7 +50,43 @@
 
 hr{
     width: 500px;
-    position: relative;
-    top: 20px;
     box-shadow: 0 0 0.5em #ffffff;
+}
+
+.evento{
+    display: flex;
+    flex-direction:row;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 500px;
+    outline: 2px solid #0095f8;
+    margin: 20px 0;
+    border-radius: 10px;
+    padding: 10px;
+}
+.listaEventos2{
+    height: max-content;
+    background-color: #eeeeee;
+    padding: 2cap;
+    border-radius: 20px;
+}
+
+.dias{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.diasFaltantes{
+    font-size: 20px;
+    font-weight: bold;
+}
+.eliminar{
+    background-color: #0095f8;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
 }
